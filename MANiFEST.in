@@ -1,0 +1,3 @@
+include README.md
+include chemviewer/templates/*
+include chemviewer/static/*

@@ -1,0 +1,185 @@
+<html>
+<head>
+<!--
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+-->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<link rel="stylesheet" href="{{web_prefix}}/static/css.css" />
+<script src=https://unpkg.com/jquery@3.3.1/dist/jquery.js></script>
+<!--
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+-->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script>
+<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+<!--
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+-->
+</head>
+<body>
+
+  <div id='app'>
+    <el-container style="min-height:100%">
+      <el-container style="border: 1px solid #eee">
+        {% if standalone %}
+        {% raw %}
+        <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+          <el-row>
+            <el-input v-model="path_input" placeholder="Path" v-on:keyup.native.enter="list_dir">
+              <el-button slot="append" v-on:click="list_dir" icon="el-icon-search"></el-button>
+            </el-input>
+          </el-row>
+          <div class="file_item">
+            <i class="el-icon-arrow-up"></i>
+            <a href='#' v-on:click="select_dir(0)">..</a>
+          </div>
+          <div class="file_item" v-for="dir in dirs">
+            <i class="el-icon-arrow-right"></i>
+            <a class="dir" href='#' v-on:click="select_dir(dir)">{{dir}}</a>
+          </div>
+          <div class="file_item" v-for="filename in filenames">
+            <i class="el-icon-document"></i>
+            <a class="file" href='#' v-on:click="select_file(filename)">{{filename}}</a>
+          </div>
+        </el-aside>
+        {% endraw %}
+        {% endif %}
+        {% raw %}
+        <el-container>
+          <div style='width:100%; margin:10px'>
+            You can either fill the SMILES (and their names) of the compounds or upload a (.xls, .csv, .txt) table file.
+            If both are input, we will first try to handle the uploaded files </br>
+            The size of the file should be no more than 100K.
+            <form>
+              <el-input
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 8}"
+                placeholder="SMILES"
+                v-model="text_smiles">
+              </el-input>
+              <input id="upload_input" type='file'
+                accept=".xls,.xlsx,.csv,.txt"></input>
+              <el-button v-on:click="submit">Submit</el-button>
+            </form>
+            <el-tabs v-model="activeTag" @tab-click="handleTagClick">
+              <el-tab-pane label="Spreadsheet" name="spreadsheet"></el-tab-pane>
+              <el-tab-pane label="Grid" name="grid" v-bind:disabled="!isCompound"></el-tab-pane>
+              <el-tab-pane label="Diagram" name="diagram"></el-tab-pane>
+            </el-tabs>
+            <div id='spreadsheet' class='tab_content' v-loading="loading">
+              <el-table
+                :data="tableData"
+                style="width: 100%">
+                <el-table-column label="Compound" v-if="isCompound">
+                  <template slot-scope="scope">
+                    <div style='width:150px;height:100px' v-html="scope.row._svg" id='cd_osca'></div>
+                  </template>
+                </el-table-column>
+                <el-table-column v-for="col in cols"
+                  :label="col"
+                  :prop="col">
+                </el-table-column>
+              </el-table>
+            </div>
+            <div id='grid' class='tab_content' style="display: none">
+              <el-row :gutter="10">
+                <el-col :span="8">
+                  <div class="block" sytle="width:200px">
+                    <span class="demonstration">Size of the pictures</span>
+                    <el-slider
+                      v-on:change="change_pic_size"
+                      style="width:100%"
+                      v-model="gridsize"
+                      :min="100"
+                      :max="400"
+                      :step="50">
+                    </el-slider>
+                  </div>
+                </el-col>
+                <el-col :span="8">
+                  <div>
+                    <el-select v-model="cols" style="width:100%" multiple placeholder="Properties">
+                      <el-option
+                        v-for="item in allowed_cols"
+                        :key="item"
+                        :label="item"
+                        :value="item">
+                      </el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="8"><div class="grid-content bg-purple"></div></el-col>
+              </el-row>
+              <div class="grid_unit" v-for="cmp in tableData" @click="openDialog(cmp)">
+                <div class="grid_pic" style='width:150px;height:150px' v-html="cmp._svg" id='cd_osca'></div>
+                <p v-for="col in cols" class="grid-property" :title="cmp[col]">
+                  {{cmp[col]}}
+                </p>
+              </div>
+              <div style="clear:both"></div>
+              <el-dialog title="Detail" :visible.sync="dialogFormVisible" v-if="dialogCmp">
+                <!-- picture -->
+                <div class="cmp_big_pic" v-html="dialogPic"></div>
+                <!-- properties -->
+                <p v-for="col in cols">
+                  <span><b>{{col}}</b>:</span>
+                  {{dialogCmp[col]}}
+                </p>
+                <div slot="footer" class="dialog-footer">
+                  <el-button @click="dialogFormVisible = false">OK</el-button>
+                </div>
+              </el-dialog>
+            </div>
+            <template>
+              <div class="block" style="">
+                <el-pagination
+                  @current-change="handleCurrentChange"
+                  :page-sizes="[100, 200, 300, 400]"
+                  :page-size.sync="pageSize"
+                  layout="sizes, prev, pager, next"
+                  :total="allData.length">
+                </el-pagination>
+              </div>
+            </template>
+          </div>
+
+        </el-container>
+        {% endraw %}
+      </el-container>
+      <el-footer style="color: #333;line-height: 60px;background-color: #B3C0D1;text-align: center;">
+          Chemviewer V {{version}} |
+          Designed by <a href="https://www.zealseeker.com/about/">Hongbin Yang</a>
+          | ©2019
+      </el-footer>
+    </el-container>
+
+
+  </div>
+
+<!--
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      message: 'Hello Vue!'
+    }
+  })
+</script>
+-->
+<script src="{{web_prefix}}/static/main.js"></script>
+{% if standalone %}
+<script>
+app.list_dir()
+function getUrlParam(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    if (r != null) return decodeURI(r[2]); return null; //返回参数值
+}
+let filepath = getUrlParam('file')
+if(filepath){
+  app.select_file(filepath, true)
+}
+</script>
+{% endif %}
+</body>
+</html>

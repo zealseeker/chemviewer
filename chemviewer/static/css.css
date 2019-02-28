@@ -1,0 +1,29 @@
+p.grid-property{
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+div.grid_unit:hover{
+  border: 1px solid blue;
+  cursor: pointer;
+}
+div.grid_unit {
+  float:left;
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #66b1ff;
+}
+.file_item {
+  border-bottom: 1px solid #DCDFE6;
+  padding: 4px;
+}
+.file_item:hover {
+  background-color: #fafafa;
+}
+.file_item a {
+  color: #337ab7;
+  text-decoration: none;
+}
+.file_item a:hover {
+  color: #23527c;
+}
