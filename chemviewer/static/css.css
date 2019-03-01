@@ -27,3 +27,9 @@ div.grid_unit {
 .file_item a:hover {
   color: #23527c;
 }
+.tab_content {
+  display: none;
+}
+#pagination {
+  display: none;
+}

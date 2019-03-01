@@ -1,10 +1,16 @@
 # Chemviewer
-A web based application to view 2D structures in a table
+Chemviewer is a web based application to view 2D structures in a table.
 
 ## Demo
 http://chemviewer.zealseeker.com
 
 ## How to use locally
+
+### Start the application
+type in `chemviewer` in the work directory or type `chemviewer table.txt`
+to browse the `table.txt`
+
+### How to install
 ```
 pip install chemviewer
 ```

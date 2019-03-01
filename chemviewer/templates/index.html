@@ -48,7 +48,7 @@
         <el-container>
           <div style='width:100%; margin:10px'>
             You can either fill the SMILES (and their names) of the compounds or upload a (.xls, .csv, .txt) table file.
-            If both are input, we will first try to handle the uploaded files </br>
+            If both are input, it will first try to handle the uploaded files </br>
             The size of the file should be no more than 100K.
             <form>
               <el-input
@@ -81,7 +81,7 @@
                 </el-table-column>
               </el-table>
             </div>
-            <div id='grid' class='tab_content' style="display: none">
+            <div id='grid' class='tab_content'>
               <el-row :gutter="10">
                 <el-col :span="8">
                   <div class="block" sytle="width:200px">
@@ -130,8 +130,11 @@
                 </div>
               </el-dialog>
             </div>
+            <div id="diagram" class='tab_content'>
+              Developing...
+            </div>
             <template>
-              <div class="block" style="">
+              <div class="block" id="pagination">
                 <el-pagination
                   @current-change="handleCurrentChange"
                   :page-sizes="[100, 200, 300, 400]"

@@ -33,7 +33,7 @@ def upload(request):
             strIO = BytesIO()
             strIO.write(data.encode('utf8'))
             strIO.seek(0)
-            df = pd.read_table(strIO, header=None, sep=None)
+            df = pd.read_table(strIO, header=None, sep=None, engine='python')
             df = df[[0,1]]
             df.columns = ['SMILES', 'Name'][:len(df.columns)]
         for col in df.columns:
@@ -67,7 +67,11 @@ def ana_table(df, col='SMILES'):
     data = df.to_dict(orient='records')
     if col:
         for item in data:
-            item['_svg'] = draw_without_label(Chem.MolFromSmiles(item[col]),size=(150,150))
+            # It's not the best way to use try
+            try:
+                item['_svg'] = draw_without_label(Chem.MolFromSmiles(item[col]),size=(150,150))
+            except:
+                item['_svg'] = ''
     return data
 
 @app.route('/upload', methods=['POST', 'GET'])

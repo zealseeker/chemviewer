@@ -5,11 +5,11 @@ services:
     image: nginx
     container_name: nginx.docker.chemviewer
     volumes:
-      nginx.conf: /etc/nginx/site-enabled/nginx.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "80: 80"
+      - "80:80"
   web:
     image: daocloud.io/zealseeker/chemviewer
     container_name: web.docker.chemviewer
     volumes:
-      /var/www/chemviewer: /var/www/chemviewer
+      - /var/www/chemviewer:/var/www/chemviewer

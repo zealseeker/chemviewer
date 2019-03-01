@@ -18,7 +18,7 @@ var app = new Vue({
       dialogCmp: null,
       dialogFormVisible: false,
       loading: false,
-      pageSize: 100
+      pageSize: 100,
   },
   methods: {
     select_dir: function(dir){
@@ -108,6 +108,11 @@ var app = new Vue({
       }
       this.tableData = res.tableData.slice(0,100)
       this.allData = res.tableData
+      if(res.tableData.length>100){
+        $('#pagination').show()
+      }else{
+        $('#pagination').hide()
+      }
       this.handleTagClick({name: 'spreadsheet'})
       this.activeTag = 'spreadsheet'
     },

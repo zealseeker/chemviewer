@@ -13,7 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/zealseeker/chemviewer",
     packages=setuptools.find_packages(),
-    scripts = ["scripts/chemviewer"],
+    # scripts = ["scripts/chemviewer"],
+    entry_points={'console_scripts': ['chemviewer=chemviewer.run:main']},
     package_data = {
         'chemviewer': ['templates/*','static/*']
     },
