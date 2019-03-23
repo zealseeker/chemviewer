@@ -2,6 +2,7 @@ p.grid-property{
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  margin: 5 0;
 }
 div.grid_unit:hover{
   border: 1px solid blue;

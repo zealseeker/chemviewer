@@ -42,7 +42,7 @@ def select_file():
     except Exception as e:
         abort(Response('Cannot parse the file'))
     for col in df.columns:
-        if col in set(['SMILES', 'Smiles', 'smi', 'Smi', 'Cannonical_Smiles']):
+        if str(col).lower() in set(['smiles', 'smi', 'cannonical_smiles']):
             smi_col = col
             break
     else:

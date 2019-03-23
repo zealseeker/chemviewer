@@ -33,11 +33,11 @@ def upload(request):
             strIO = BytesIO()
             strIO.write(data.encode('utf8'))
             strIO.seek(0)
-            df = pd.read_table(strIO, header=None, sep=None, engine='python')
+            df = pd.read_table(strIO, header=None, sep='[\t|\s+,]', engine='python')
             df = df[[0,1]]
             df.columns = ['SMILES', 'Name'][:len(df.columns)]
         for col in df.columns:
-            if col in set(['SMILES', 'Smiles', 'smiles', 'smi', 'Smi', 'Cannonical_Smiles']):
+            if str(col).lower() in set(['smiles', 'smi', 'cannonical_smiles']):
                 smi_col = col
                 break
         else:
