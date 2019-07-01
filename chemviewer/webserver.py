@@ -1,9 +1,13 @@
 from chemviewer.core import app
 from chemviewer.core import index
+import os
 
 @app.route('/')
 def entrence():
-    return index('webserver')
+    zealseeker = False
+    if 'CHEMVIEWER_SERVER' in os.environ:
+        zealseeker = os.environ['CHEMVIEWER_SERVER'] == 'zealseeker'
+    return index('webserver', zealseeker=zealseeker)
 
 
 if __name__ == '__main__':

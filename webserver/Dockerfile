@@ -18,6 +18,7 @@ RUN echo "export PATH=/opt/conda/bin:$PATH" > /etc/profile.d/conda.sh && \
 
 # Set and create environment
 ENV PATH /opt/conda/bin:$PATH
+ENV CHEMVIEWER_SERVER zealseeker
 
 RUN conda install -y -c rdkit rdkit flask && \
     conda install -y -c conda-forge uwsgi libiconv

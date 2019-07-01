@@ -160,29 +160,30 @@
 
   </div>
 
-<!--
-<script>
-  var app = new Vue({
-    el: '#app',
-    data: {
-      message: 'Hello Vue!'
-    }
-  })
-</script>
--->
 <script src="{{web_prefix}}/static/main.js"></script>
 {% if standalone %}
 <script>
 app.list_dir()
 function getUrlParam(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
-    if (r != null) return decodeURI(r[2]); return null; //返回参数值
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return decodeURI(r[2]); return null;
 }
 let filepath = getUrlParam('file')
 if(filepath){
   app.select_file(filepath, true)
 }
+</script>
+{% endif %}
+{% if standalone and zealseeker %}
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?406d091f1beeaa58b4cfad41ac041da9";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
 </script>
 {% endif %}
 </body>

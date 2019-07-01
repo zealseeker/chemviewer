@@ -14,9 +14,9 @@ from chemviewer import __version__
 app = Flask(__name__)
 FILEMAXSIZE = 100
 
-def index(type='standalone'):
+def index(type='standalone', **kwargs):
     return render_template('index.html', standalone=(type=='standalone'),
-                           version=__version__)
+                           version=__version__, **kwargs)
 
 def upload(request):
     if request.method == 'POST':

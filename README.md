@@ -24,7 +24,7 @@ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 Then install the dependencies:
 ```
-conda install falsk
+conda install flask
 conda install -c rdkit rdkit
 ```
 
