@@ -1,20 +1,11 @@
 <html>
 <head>
-<!--
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
--->
 <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 <link rel="stylesheet" href="{{web_prefix}}/static/css.css" />
 <script src=https://unpkg.com/jquery@3.3.1/dist/jquery.js></script>
-<!--
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
--->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script>
 <script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
-<!--
-<script src="https://cdn.jsdelivr.net/npm/vue"></script>
--->
 <title>ChemViewer</title>
 </head>
 <body>
@@ -48,25 +39,32 @@
         {% raw %}
         <el-container>
           <div style='width:100%; margin:10px'>
-            You can either fill the SMILES (and their names) of the compounds or upload a (.xls, .csv, .txt) table file.
-            If both are input, it will first try to handle the uploaded files </br>
-            The size of the file should be no more than 100K.
-            <form>
-              <el-input
-                type="textarea"
-                :autosize="{ minRows: 2, maxRows: 8}"
-                placeholder="SMILES"
-                v-model="text_smiles">
-              </el-input>
-              <input id="upload_input" type='file'
-                accept=".xls,.xlsx,.csv,.txt"></input>
-              <el-button v-on:click="submit">Submit</el-button>
-            </form>
-            <el-tabs v-model="activeTag" @tab-click="handleTagClick">
-              <el-tab-pane label="Spreadsheet" name="spreadsheet"></el-tab-pane>
-              <el-tab-pane label="Grid" name="grid" v-bind:disabled="!isCompound"></el-tab-pane>
-              <el-tab-pane label="Diagram" name="diagram"></el-tab-pane>
-            </el-tabs>
+            <div v-if="inputShow">
+              You can either fill the SMILES (and their names) of the compounds or upload a (.xls, .csv, .txt) table file.
+              If both are input, it will first try to handle the uploaded files </br>
+              The size of the file should be no more than 100K.
+              <form>
+                <el-input
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 8}"
+                  placeholder="SMILES"
+                  v-model="text_smiles">
+                </el-input>
+                <input id="upload_input" type='file'
+                  accept=".xls,.xlsx,.csv,.txt"></input>
+                <el-button v-on:click="submit">Submit</el-button>
+              </form>
+            </div>
+            <div style="display: flex">
+              <el-tabs v-model="activeTag" @tab-click="handleTagClick" style="flex:1">
+                <el-tab-pane label="Spreadsheet" name="spreadsheet"></el-tab-pane>
+                <el-tab-pane label="Grid" name="grid" v-bind:disabled="!isCompound"></el-tab-pane>
+                <el-tab-pane label="Diagram" name="diagram"></el-tab-pane>
+              </el-tabs>
+              <el-button :icon="inputShow?'el-icon-arrow-up':'el-icon-arrow-down'"
+                style='float: right;width:50px' type="text" @click="click_input_hide"></el-button>
+            </div>
+            </el-row>
             <div id='spreadsheet' class='tab_content' v-loading="loading">
               <el-table
                 :data="tableData"

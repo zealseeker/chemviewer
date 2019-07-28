@@ -19,11 +19,12 @@ var app = new Vue({
       dialogFormVisible: false,
       loading: false,
       pageSize: 100,
+      inputShow: true
   },
   methods: {
     select_dir: function(dir){
       if (dir == 0){
-        this.path_input = crtpath.replace(/\/[\w\.]+$/,'')
+        this.path_input = crtpath.replace(/\/[\u4e00-\u9fa5_a-zA-Z0-9]+$/,'')
       }else{
         this.path_input = crtpath + '/' + dir
       }
@@ -88,6 +89,7 @@ var app = new Vue({
       .then(res=>{
         res = JSON.parse(res.replace(/\bNaN\b/g,null))
         this.loading=false
+        this.inputShow=false
         return this.parseRes(res)
       })
       .catch(err=>{
@@ -162,6 +164,9 @@ var app = new Vue({
     handleCurrentChange(val) {
       console.log(val)
       this.tableData = this.allData.slice((val-1)*this.pageSize, val*this.pageSize)
+    },
+    click_input_hide(){
+      this.inputShow = !this.inputShow
     }
   }
 })
