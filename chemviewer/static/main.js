@@ -171,17 +171,19 @@ var app = new Vue({
     },
     openDialog(cmp){
       this.dialogFormVisible=true
-      if (this.isReaction){
-        template = cmp._svg.match(/<svg[\s.\S]+?>/)[0]
-        width = parseInt(template.match(/width='(\d*)px'/)[1])
-        height = parseInt(template.match(/height='(\d*)px'/)[1])
-        template = this.get_svg_template(900,300,width,height)
-        $('.el-dialog').css('width', '920px')
-      }else{
-        template = this.get_svg_template(400,300)
-        $('.el-dialog').css('width', '')
+      if (cmp._svg){
+        if (this.isReaction){
+          template = cmp._svg.match(/<svg[\s.\S]+?>/)[0]
+          width = parseInt(template.match(/width='(\d*)px'/)[1])
+          height = parseInt(template.match(/height='(\d*)px'/)[1])
+          template = this.get_svg_template(900,300,width,height)
+        }else{
+          template = this.get_svg_template(400,300)
+        }
+        this.dialogPic = cmp._svg.replace(/<svg[\s.\S]+?>/, template)
+      } else {
+        this.dialogPic = 'Cannot show the picture'
       }
-      this.dialogPic = cmp._svg.replace(/<svg[\s.\S]+?>/, template)
       this.dialogCmp = cmp
     },
     handleCurrentChange(val) {

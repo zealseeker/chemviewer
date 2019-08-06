@@ -84,9 +84,12 @@ def ana_table(df, col='SMILES', type=None):
                 item['_svg'] = ''
     elif type == 'reaction':
         for item in data:
-            rxn = AllChem.ReactionFromSmarts(item[col], useSmiles=True)
-            svg = Draw.ReactionToImage(rxn, subImgSize=(150, 150), useSVG=True)
-            item['_svg'] = svg
+            try:
+                rxn = AllChem.ReactionFromSmarts(item[col], useSmiles=True)
+                svg = Draw.ReactionToImage(rxn, subImgSize=(150, 150), useSVG=True)
+                item['_svg'] = svg
+            except:
+                item['_svg'] = ''
     return data
 
 @app.route('/upload', methods=['POST', 'GET'])
