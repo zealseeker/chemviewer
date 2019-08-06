@@ -34,3 +34,6 @@ div.grid_unit {
 #pagination {
   display: none;
 }
+.el-dialog {
+  width: 920px;
+}

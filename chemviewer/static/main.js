@@ -13,7 +13,8 @@ var app = new Vue({
       allData: [],
       allowed_cols: ['SMILES', 'Name'],
       cols: ['SMILES', 'Name'],
-      isCompound: true,
+      isCompound: false,
+      isReaction: false,
       gridsize: 150,
       dialogCmp: null,
       dialogFormVisible: false,
@@ -47,16 +48,16 @@ var app = new Vue({
       }else{
         path = crtpath+'/'+filepath
       }
+      this.loading=true
       fetch('/file?path='+path)
       .then(res=>{
-        console.log(res)
         if(res)
           return res.text()
       })
       .then(res=>{
-        console.log(res)
         if(res){
           res = JSON.parse(res.replace(/\bNaN\b/g,null))
+          this.loading=false
           return this.parseRes(res)
         }
       })
@@ -99,12 +100,17 @@ var app = new Vue({
     parseRes(res){
       if (res && res.tableData){
         headers = []
-        isCompound = false
+        //TODO this can be improved
+        this.isCompound = false
+        this.isReaction = false
+        if (res.type=='compound'){
+          this.isCompound = true
+        }else if(res.type=='reaction'){
+          this.isReaction = true
+        }
         for (i in res.tableData[0]){
           if (i!='_svg') headers.push(i)
-          if (i=='_svg') isCompound = true
         }
-        this.isCompound = isCompound
         this.allowed_cols = headers
         this.cols = headers
       }
@@ -115,8 +121,13 @@ var app = new Vue({
       }else{
         $('#pagination').hide()
       }
-      this.handleTagClick({name: 'spreadsheet'})
-      this.activeTag = 'spreadsheet'
+      if(this.isReaction){
+        this.handleTagClick({name: 'reaction'})
+        this.activeTag = 'reaction'
+      }else{
+        this.handleTagClick({name: 'spreadsheet'})
+        this.activeTag = 'spreadsheet'
+      }
     },
     handleTagClick(tab, event){
       $('.tab_content').hide()
@@ -134,14 +145,17 @@ var app = new Vue({
         }
       }
     },
-    get_svg_template(weight, height){
-      if (!height){
-        height=weight
-      }
+    get_svg_template(width, height, owidth, oheight){
+      height = height || width
+      owidth = owidth || 150
+      oheight = oheight || owidth
       template = '<svg version="1.1" baseProfile="full" xmlns:svg="http://www.w3.org/2000/svg"' +
       'xmlns:rdkit="http://www.rdkit.org/xml" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
-      'xml:space="preserve" width="%weight%px" height="%height%px" viewBox="0 0 150 150">"'
-      return template.replace(/%weight%/g,weight).replace(/%height%/g,height)
+      'xml:space="preserve" width="%width%px" height="%height%px" ' +
+      'viewBox="0 0 %owidth% %oheight%">"'
+      new_template = template.replace(/%width%/g,width).replace(/%height%/g,height)
+        .replace(/%owidth%/g,owidth).replace(/%oheight%/,oheight)
+      return new_template
     },
     change_pic_size(size){
       $('.grid_unit').css('width',size+'px')
@@ -157,7 +171,16 @@ var app = new Vue({
     },
     openDialog(cmp){
       this.dialogFormVisible=true
-      template = this.get_svg_template(400,300)
+      if (this.isReaction){
+        template = cmp._svg.match(/<svg[\s.\S]+?>/)[0]
+        width = parseInt(template.match(/width='(\d*)px'/)[1])
+        height = parseInt(template.match(/height='(\d*)px'/)[1])
+        template = this.get_svg_template(900,300,width,height)
+        $('.el-dialog').css('width', '920px')
+      }else{
+        template = this.get_svg_template(400,300)
+        $('.el-dialog').css('width', '')
+      }
       this.dialogPic = cmp._svg.replace(/<svg[\s.\S]+?>/, template)
       this.dialogCmp = cmp
     },

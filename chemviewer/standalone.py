@@ -41,13 +41,20 @@ def select_file():
               'txt': pd.read_table, 'xls': pd.read_excel}[suffix](path)
     except Exception as e:
         abort(Response('Cannot parse the file'))
+    type = None
     for col in df.columns:
         if str(col).lower() in set(['smiles', 'smi', 'cannonical_smiles']):
+            type = 'compound'
+        if str(col).lower() in set(['reaction']):
+            type = 'reaction'
+        if type:
             smi_col = col
             break
     else:
         smi_col = None
-    return jsonify({'tableData': ana_table(df, smi_col),'queryNo':generate_key()})
+    return jsonify({'tableData': ana_table(df, smi_col, type),
+                    'queryNo':generate_key(),
+                    'type': type})
 
 
 if __name__ == '__main__':

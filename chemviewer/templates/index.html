@@ -55,23 +55,22 @@
                 <el-button v-on:click="submit">Submit</el-button>
               </form>
             </div>
-            <div style="display: flex">
+            <div id="nevigate_bar" style="display: flex">
               <el-tabs v-model="activeTag" @tab-click="handleTagClick" style="flex:1">
-                <el-tab-pane label="Spreadsheet" name="spreadsheet"></el-tab-pane>
+                <el-tab-pane label="Spreadsheet" name="spreadsheet" v-bind:disabled="isReaction"></el-tab-pane>
                 <el-tab-pane label="Grid" name="grid" v-bind:disabled="!isCompound"></el-tab-pane>
-                <el-tab-pane label="Diagram" name="diagram"></el-tab-pane>
+                <el-tab-pane label="Reaction" name="reaction" v-bind:disabled="!isReaction"></el-tab-pane>
               </el-tabs>
               <el-button :icon="inputShow?'el-icon-arrow-up':'el-icon-arrow-down'"
                 style='float: right;width:50px' type="text" @click="click_input_hide"></el-button>
             </div>
-            </el-row>
             <div id='spreadsheet' class='tab_content' v-loading="loading">
               <el-table
                 :data="tableData"
                 style="width: 100%">
                 <el-table-column label="Compound" v-if="isCompound">
                   <template slot-scope="scope">
-                    <div style='width:150px;height:100px' v-html="scope.row._svg" id='cd_osca'></div>
+                    <div style='width:150px;height:100px' v-html="scope.row._svg"></div>
                   </template>
                 </el-table-column>
                 <el-table-column v-for="col in cols"
@@ -110,28 +109,41 @@
                 <el-col :span="8"><div class="grid-content bg-purple"></div></el-col>
               </el-row>
               <div class="grid_unit" v-for="cmp in tableData" @click="openDialog(cmp)">
-                <div class="grid_pic" style='width:150px;height:150px' v-html="cmp._svg" id='cd_osca'></div>
+                <div class="grid_pic" style='width:150px;height:150px' v-html="cmp._svg"></div>
                 <p v-for="col in cols" class="grid-property" :title="cmp[col]">
                   {{cmp[col]}}
                 </p>
               </div>
               <div style="clear:both"></div>
-              <el-dialog title="Detail" :visible.sync="dialogFormVisible" v-if="dialogCmp">
-                <!-- picture -->
-                <div class="cmp_big_pic" v-html="dialogPic"></div>
-                <!-- properties -->
-                <p v-for="col in cols">
-                  <span><b>{{col}}</b>:</span>
-                  {{dialogCmp[col]}}
-                </p>
-                <div slot="footer" class="dialog-footer">
-                  <el-button @click="dialogFormVisible = false">OK</el-button>
-                </div>
-              </el-dialog>
             </div>
-            <div id="diagram" class='tab_content'>
-              Developing...
+            <div id="reaction" class='tab_content' v-loading="loading">
+              <el-table
+                :data="tableData"
+                style="width: 100%">
+                <el-table-column label="Reaction" v-if="isReaction">
+                  <template slot-scope="scope">
+                    <div style='width:600px;height:150px;cursor:pointer' v-html="scope.row._svg"
+                      @click="openDialog(scope.row)"></div>
+                  </template>
+                </el-table-column>
+                <el-table-column v-for="col in cols"
+                  :label="col"
+                  :prop="col">
+                </el-table-column>
+              </el-table>
             </div>
+            <el-dialog title="Detail" :visible.sync="dialogFormVisible" v-if="dialogCmp">
+              <!-- picture -->
+              <div class="cmp_big_pic" v-html="dialogPic"></div>
+              <!-- properties -->
+              <p v-for="col in cols">
+                <span><b>{{col}}</b>:</span>
+                {{dialogCmp[col]}}
+              </p>
+              <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">OK</el-button>
+              </div>
+            </el-dialog>
             <template>
               <div class="block" id="pagination">
                 <el-pagination
@@ -161,27 +173,27 @@
 <script src="{{web_prefix}}/static/main.js"></script>
 {% if standalone %}
 <script>
-app.list_dir()
-function getUrlParam(name) {
+  app.list_dir()
+  function getUrlParam(name) {
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
     var r = window.location.search.substr(1).match(reg);
     if (r != null) return decodeURI(r[2]); return null;
-}
-let filepath = getUrlParam('file')
-if(filepath){
-  app.select_file(filepath, true)
-}
+  }
+  let filepath = getUrlParam('file')
+  if(filepath){
+    app.select_file(filepath, true)
+  }
 </script>
 {% endif %}
 {% if not standalone and zealseeker %}
 <script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?406d091f1beeaa58b4cfad41ac041da9";
-  var s = document.getElementsByTagName("script")[0];
-  s.parentNode.insertBefore(hm, s);
-})();
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?406d091f1beeaa58b4cfad41ac041da9";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
 </script>
 {% endif %}
 </body>

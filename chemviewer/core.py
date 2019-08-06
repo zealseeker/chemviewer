@@ -6,9 +6,11 @@ from werkzeug.utils import secure_filename
 import random
 import pandas as pd
 from six import BytesIO
+import re
 from rdkit import Chem
+from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
-from rdkit.Chem import rdDepictor
+from rdkit.Chem import rdDepictor, Draw
 from chemviewer import __version__
 
 app = Flask(__name__)
@@ -33,16 +35,25 @@ def upload(request):
             strIO = BytesIO()
             strIO.write(data.encode('utf8'))
             strIO.seek(0)
-            df = pd.read_table(strIO, header=None, sep='[\t|\s+,]', engine='python')
-            df = df[[0,1]]
-            df.columns = ['SMILES', 'Name'][:len(df.columns)]
+            df = pd.read_csv(strIO, header=None, sep='\t|\s+,', engine='python')
+            if re.findall('>.*>', df[0][0]):
+                df.columns = ['Reaction', 'Name'][:len(df.columns)]
+            else:
+                df.columns = ['SMILES', 'Name'][:len(df.columns)]
+        type = None
         for col in df.columns:
             if str(col).lower() in set(['smiles', 'smi', 'cannonical_smiles']):
+                type = 'compound'
+            if str(col).lower() in set(['reaction']):
+                type = 'reaction'
+            if type:
                 smi_col = col
                 break
         else:
             smi_col = None
-        return jsonify({'tableData': ana_table(df, smi_col),'queryNo':generate_key()})
+        return jsonify({'tableData': ana_table(df, smi_col, type),
+                        'queryNo':generate_key(),
+                        'type': type})
     else:
         print('Not POST')
         return jsonify('Error')
@@ -62,16 +73,20 @@ def draw_without_label(m,highlightAtoms=None,size=(200,200)):
     svg = drawer.GetDrawingText().replace('svg:','')
     return svg
 
-def ana_table(df, col='SMILES'):
-    # TODO find SMILES column
+def ana_table(df, col='SMILES', type=None):
     data = df.to_dict(orient='records')
-    if col:
+    if type == 'compound':
         for item in data:
-            # It's not the best way to use try
+            # TODO It's not the best way to use try
             try:
                 item['_svg'] = draw_without_label(Chem.MolFromSmiles(item[col]),size=(150,150))
             except:
                 item['_svg'] = ''
+    elif type == 'reaction':
+        for item in data:
+            rxn = AllChem.ReactionFromSmarts(item[col], useSmiles=True)
+            svg = Draw.ReactionToImage(rxn, subImgSize=(150, 150), useSVG=True)
+            item['_svg'] = svg
     return data
 
 @app.route('/upload', methods=['POST', 'GET'])
