@@ -65,10 +65,12 @@ def draw_without_label(m,highlightAtoms=None,size=(200,200)):
     rdDepictor.Compute2DCoords(m)
     try:
         Chem.Kekulize(m)
+        mc = rdMolDraw2D.PrepareMolForDrawing(m, kekulize=True)
     except:
+        mc = rdMolDraw2D.PrepareMolForDrawing(m, kekulize=False)
         pass
     drawer = rdMolDraw2D.MolDraw2DSVG(*size)
-    drawer.DrawMolecule(m,highlightAtoms = highlightAtoms)
+    drawer.DrawMolecule(mc,highlightAtoms = highlightAtoms)
     drawer.FinishDrawing()
     svg = drawer.GetDrawingText().replace('svg:','')
     return svg
