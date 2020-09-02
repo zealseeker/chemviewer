@@ -13,8 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/zealseeker/chemviewer",
     packages=setuptools.find_packages(),
-    # scripts = ["scripts/chemviewer"],
     entry_points={'console_scripts': ['chemviewer=chemviewer.run:main']},
+    include_package_data=True,
     package_data = {
         'chemviewer': ['templates/*','static/*']
     },
@@ -23,4 +23,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    zip_safe=False,
 )
