@@ -1,16 +1,20 @@
 # Chemviewer
-Chemviewer is a web based application to view 2D structures in a table.
+Chemviewer is a web based application to view 2D chemical structures or reactions in a table.
+The local version supports both text input and file selection (from local directory).
 
-## Demo
-http://chemviewer.zealseeker.com
+![](doc/ui/ui-spreadsheet.png)
+![](doc/ui/ui-grid.png)
 
 ## How to use locally
 
 ### Start the application
-type in `chemviewer` in the work directory or type `chemviewer table.txt`
-to browse the `table.txt`
+Type in `chemviewer` in the work directory or type `chemviewer table.txt`
+to browse the `table.txt`. The input file should have title line and 
+there should be one column of which the title is "smi", "smiles", or
+"cannonical_smiles" (case insensitive).
 
 ### How to install
+
 ```
 pip install chemviewer
 ```
@@ -24,8 +28,9 @@ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 Then install the dependencies:
 ```
+conda create -n chemviewer -c conda-forge rdkit
+conda activate chemviewer
 conda install flask
-conda install -c rdkit rdkit
 ```
 
 ## Dependency

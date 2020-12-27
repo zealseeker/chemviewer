@@ -6,6 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script>
 <script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+<script async defer src="https://buttons.github.io/buttons.js"></script>
 <title>ChemViewer</title>
 </head>
 <body>
@@ -166,7 +167,14 @@
       <el-footer style="color: #333;line-height: 60px;background-color: #B3C0D1;text-align: center;">
           Chemviewer V {{version}} |
           Designed by <a href="https://www.zealseeker.com/about/">Hongbin Yang</a>
-          | ©2019
+          | ©2019-2021
+          | 
+          <span style="top:4px; position: relative;">
+            <a class="github-button"
+              href="https://github.com/zealseeker/chemviewer/issues" 
+              data-icon="octicon-issue-opened" 
+              aria-label="Issue zealseeker/chemviewer on GitHub">Issue</a>
+          </span>
       </el-footer>
     </el-container>
 
@@ -186,17 +194,6 @@
   if(filepath){
     app.select_file(filepath, true)
   }
-</script>
-{% endif %}
-{% if not standalone and zealseeker %}
-<script>
-  var _hmt = _hmt || [];
-  (function() {
-    var hm = document.createElement("script");
-    hm.src = "https://hm.baidu.com/hm.js?406d091f1beeaa58b4cfad41ac041da9";
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(hm, s);
-  })();
 </script>
 {% endif %}
 </body>
