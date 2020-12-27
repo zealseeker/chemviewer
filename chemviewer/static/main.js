@@ -20,12 +20,13 @@ var app = new Vue({
       dialogFormVisible: false,
       loading: false,
       pageSize: 100,
-      inputShow: true
+      inputShow: true,
+      keepinput: false
   },
   methods: {
     select_dir: function(dir){
       if (dir == 0){
-        this.path_input = crtpath.replace(/\/[\u4e00-\u9fa5_a-zA-Z0-9]+$/,'')
+        this.path_input = crtpath.replace(/\/[\u4e00-\u9fa5_a-zA-Z0-9\s\-]+$/,'')
       }else{
         this.path_input = crtpath + '/' + dir
       }
@@ -90,7 +91,8 @@ var app = new Vue({
       .then(res=>{
         res = JSON.parse(res.replace(/\bNaN\b/g,null))
         this.loading=false
-        this.inputShow=false
+        if(!this.keepinput)
+          this.inputShow=false
         return this.parseRes(res)
       })
       .catch(err=>{
@@ -147,7 +149,7 @@ var app = new Vue({
     },
     get_svg_template(width, height, owidth, oheight){
       height = height || width
-      owidth = owidth || 150
+      owidth = owidth || 200
       oheight = oheight || owidth
       template = '<svg version="1.1" baseProfile="full" xmlns:svg="http://www.w3.org/2000/svg"' +
       'xmlns:rdkit="http://www.rdkit.org/xml" xmlns:xlink="http://www.w3.org/1999/xlink" ' +

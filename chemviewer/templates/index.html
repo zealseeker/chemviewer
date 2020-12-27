@@ -53,6 +53,9 @@
                 <input id="upload_input" type='file'
                   accept=".xls,.xlsx,.csv,.txt"></input>
                 <el-button v-on:click="submit">Submit</el-button>
+                <el-switch v-model="keepinput"
+                  active-text="Keep input"
+                  inactive-text="Hide input after submit"></el-switch>
               </form>
             </div>
             <div id="nevigate_bar" style="display: flex">

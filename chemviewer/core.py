@@ -70,10 +70,39 @@ def draw_without_label(m,highlightAtoms=None,size=(200,200)):
         mc = rdMolDraw2D.PrepareMolForDrawing(m, kekulize=False)
         pass
     drawer = rdMolDraw2D.MolDraw2DSVG(*size)
-    drawer.DrawMolecule(mc,highlightAtoms = highlightAtoms)
+    drawer.DrawMolecule(mc, highlightAtoms=highlightAtoms)
     drawer.FinishDrawing()
     svg = drawer.GetDrawingText().replace('svg:','')
     return svg
+
+def draw_reaction(rxn, subImgSize=(150, 150)):
+    r = rxn
+    width = subImgSize[0] * (rxn.GetNumReactantTemplates() + rxn.GetNumProductTemplates() + 1)
+    d = rdMolDraw2D.MolDraw2DSVG(width, subImgSize[1])
+    atlab = d.drawOptions().atomLabels
+    gi = 0  # Global index
+    for mol in r.GetReactants():
+        rdDepictor.Compute2DCoords(mol)
+        m = rdMolDraw2D.PrepareMolForDrawing(mol, kekulize=False)
+        i_gi_map = []
+        for i, atom in enumerate(m.GetAtoms()):
+            if atom.GetSymbol()=='C':
+                atlab[gi] = str(atom.GetAtomMapNum())
+            i_gi_map.append(gi)
+            gi += 1
+    covered_idx = set()
+    for mol in r.GetProducts():
+        rdDepictor.Compute2DCoords(mol)
+        m = rdMolDraw2D.PrepareMolForDrawing(mol, kekulize=False)
+        i_gi_map = []
+        for i, atom in enumerate(m.GetAtoms()):
+            if atom.GetSymbol()=='C':
+                atlab[gi] = str(atom.GetAtomMapNum())
+            i_gi_map.append(gi)
+            gi += 1
+    d.DrawReaction(r)
+    d.FinishDrawing()
+    return d.GetDrawingText()
 
 def ana_table(df, col='SMILES', type=None):
     data = df.to_dict(orient='records')
@@ -81,16 +110,16 @@ def ana_table(df, col='SMILES', type=None):
         for item in data:
             # TODO It's not the best way to use try
             try:
-                item['_svg'] = draw_without_label(Chem.MolFromSmiles(item[col]),size=(150,150))
+                item['_svg'] = draw_without_label(Chem.MolFromSmiles(item[col]),size=(200,200))
             except:
                 item['_svg'] = ''
     elif type == 'reaction':
         for item in data:
             try:
                 rxn = AllChem.ReactionFromSmarts(item[col], useSmiles=True)
-                svg = Draw.ReactionToImage(rxn, subImgSize=(150, 150), useSVG=True)
+                svg = draw_reaction(rxn, subImgSize=(150, 150))
                 item['_svg'] = svg
-            except:
+            except Exception as e:
                 item['_svg'] = ''
     return data
 
