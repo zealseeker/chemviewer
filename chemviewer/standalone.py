@@ -9,6 +9,7 @@ from chemviewer.core import upload
 from chemviewer.core import app
 from chemviewer.core import ana_table
 from chemviewer.core import generate_key
+from chemviewer import __version__
 import os
 import pandas as pd
 
@@ -56,6 +57,10 @@ def select_file():
                     'queryNo':generate_key(),
                     'type': type})
 
+@app.route('/analysis')
+def analysis_view():
+    return render_template('analysis.html', standalone=(type=='standalone'),
+                           version=__version__)
 
 if __name__ == '__main__':
     app.run(debug=True)

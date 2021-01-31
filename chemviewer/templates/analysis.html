@@ -1,0 +1,54 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<link rel="stylesheet" href="{{web_prefix}}/static/css.css" />
+<script src=https://unpkg.com/jquery@3.3.1/dist/jquery.js></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script>
+<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+<title>ChemViewer</title>
+</head>
+<body>
+    <div id='app'>
+        <el-container style="min-height:100%">
+            <el-container style="border: 1px solid #eee">
+              {% raw %}
+              <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                <el-row>
+                  <el-input v-model="path_input" placeholder="Path" v-on:keyup.native.enter="list_dir">
+                    <el-button slot="append" v-on:click="list_dir" icon="el-icon-search"></el-button>
+                  </el-input>
+                </el-row>
+                <div class="file_item">
+                  <i class="el-icon-arrow-up"></i>
+                  <a href='#' v-on:click="select_dir(0)">..</a>
+                </div>
+                <div class="file_item" v-for="dir in dirs">
+                  <i class="el-icon-arrow-right"></i>
+                  <a class="dir" href='#' v-on:click="select_dir(dir)">{{dir}}</a>
+                </div>
+                <div class="file_item" v-for="filename in filenames">
+                  <i class="el-icon-document"></i>
+                  <a class="file" href='#' v-on:click="select_file(filename)">{{filename}}</a>
+                </div>
+              </el-aside>
+              <el-container>
+                <p>Select a file from the left</p>
+                <el-input v-model="input_file" placeholder=""></el-input>
+              </el-container>
+              {% endraw %}
+            </el-container>
+            {% include 'footer.html' %}
+        </el-container>
+
+    </div>
+    <script>
+        GLOBAL_PAGE="analysis"
+    </script>
+    <script>
+      GLOBAL_STD=true;
+    </script>
+    <script src="{{web_prefix}}/static/bundle.js"></script>
+</body>
+</html>

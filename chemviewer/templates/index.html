@@ -3,9 +3,9 @@
 <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 <link rel="stylesheet" href="{{web_prefix}}/static/css.css" />
 <script src=https://unpkg.com/jquery@3.3.1/dist/jquery.js></script>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script>
-<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+<!-- <script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script> -->
+<!-- <script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script> -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <title>ChemViewer</title>
 </head>
@@ -78,6 +78,7 @@
                   </template>
                 </el-table-column>
                 <el-table-column v-for="col in cols"
+                  v-bind:key="col"
                   :label="col"
                   :prop="col">
                 </el-table-column>
@@ -131,6 +132,7 @@
                   </template>
                 </el-table-column>
                 <el-table-column v-for="col in cols"
+                  v-bind:key="col"
                   :label="col"
                   :prop="col">
                 </el-table-column>
@@ -164,37 +166,21 @@
         </el-container>
         {% endraw %}
       </el-container> 
-      <el-footer style="color: #333;line-height: 60px;background-color: #B3C0D1;text-align: center;">
-          Chemviewer V {{version}} |
-          Designed by <a href="https://www.zealseeker.com/about/">Hongbin Yang</a>
-          | ©2019-2021
-          | 
-          <span style="top:4px; position: relative;">
-            <a class="github-button"
-              href="https://github.com/zealseeker/chemviewer/issues" 
-              data-icon="octicon-issue-opened" 
-              aria-label="Issue zealseeker/chemviewer on GitHub">Issue</a>
-          </span>
-      </el-footer>
+      {% include 'footer.html' %}
     </el-container>
 
 
   </div>
-
-<script src="{{web_prefix}}/static/main.js"></script>
-{% if standalone %}
 <script>
-  app.list_dir()
-  function getUrlParam(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) return decodeURI(r[2]); return null;
-  }
-  let filepath = getUrlParam('file')
-  if(filepath){
-    app.select_file(filepath, true)
-  }
+  GLOBAL_PAGE='main';
 </script>
-{% endif %}
+  {% if standalone %}
+<script>
+  GLOBAL_STD=true;
+</script>
+  {% endif %}
+
+<script src="{{web_prefix}}/static/bundle.js"></script>
+
 </body>
 </html>

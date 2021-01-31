@@ -105,3 +105,9 @@ venv.bak/
 
 /.vscode
 .DS_Store
+
+# Front-end
+node_modules
+*.woff
+*.ttf
+bundle.js

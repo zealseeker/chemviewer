@@ -1,0 +1,35 @@
+{
+  "name": "chemviewer",
+  "version": "1.0.0",
+  "description": "Chemviewer is a web based application to view 2D chemical structures or reactions in a table. The local version supports both text input and file selection (from local directory).",
+  "main": "webpack.config.js",
+  "directories": {
+    "doc": "doc",
+    "test": "tests"
+  },
+  "dependencies": {
+    "element-ui": "^2.15.0",
+    "vue": "^2.6.12"
+  },
+  "devDependencies": {
+    "css-loader": "^5.0.1",
+    "file-loader": "^6.2.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.19.0",
+    "webpack-cli": "^4.4.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zealseeker/chemviewer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zealseeker/chemviewer/issues"
+  },
+  "homepage": "https://github.com/zealseeker/chemviewer#readme"
+}

@@ -4,8 +4,9 @@ LABEL maintainer="yanyanghong@163.com"
 
 
 # Get conda, supervisor
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 WEBENV=docker PYTHONPATH=/var/www/chemviewer
-RUN DEBIAN_FRONTEND="noninteractive" apt-get update --fix-missing && \
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 WEBENV=docker DEBIAN_FRONTEND="noninteractive" \
+    PYTHONPATH=/var/www/chemviewer
+RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates \
     libglib2.0-0 libxext6 libsm6 libxrender1 \
     git mercurial subversion libxrender-dev supervisor build-essential \
