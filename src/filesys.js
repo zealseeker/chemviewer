@@ -1,6 +1,9 @@
 export const filemixin = {
-    created: function(){
-        console.log('混入成功');
+    data: {
+        crtpath: '.',
+        path_input: '.',
+        filenames: [],
+        dirs: [],
     },
     methods:{
         select_dir(dir){

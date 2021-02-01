@@ -23,5 +23,6 @@ module.exports = {
             }
         ]
   },
-  mode: 'development'
+  mode: 'development',
+  devtool: "eval-cheap-module-source-map"
 };

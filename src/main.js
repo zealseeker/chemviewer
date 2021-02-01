@@ -3,8 +3,10 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import locale from 'element-ui/lib/locale/lang/en'
 import {filemixin} from './filesys'
+import {scatter_plot} from './d3fnc'
 
 Vue.use(ElementUI, { locale })
+Vue.config.devtools = true
 const filemaxsize = 100  // K
 function getUrlParam(name) {
   var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
@@ -17,10 +19,6 @@ if (GLOBAL_PAGE == 'main'){
     mixins: [filemixin],
     data: {
         text_smiles:'c1ccccc1 beneze\nCCC dimethylmethane',
-        crtpath: '.',
-        path_input: '.',
-        filenames: [],
-        dirs: [],
         activeTag: 'spreadsheet',
         tableData: [],
         allData: [],
@@ -206,10 +204,107 @@ else if(GLOBAL_PAGE=='analysis'){
     el: "#app",
     mixins: [filemixin],
     data:{
-      
+      input_file: '',
+      table_columns: [],
+      loading: false,
+      table_length: 0,
+      smiles_column: null,
+      fingerprint_types: ['ECFP4'],
+      fingerprint: 'ECFP4',
+      progress: 1,
+      jobid: '',
+      failed: false,
+      pca_data: null
     },
     methods:{
-
+      select_file(filename){
+        let path
+        path = this.crtpath+'/'+filename
+        this.input_file = path
+        this.loading=true
+        fetch('/file?mode=pre&path='+path)
+        .then(res=>{
+          if(res)
+            return res.text()
+        })
+        .then(res=>{
+          if(res){
+            res = JSON.parse(res)
+            this.loading=false
+            this.table_columns = res.columns
+            this.table_length = res.length
+            if (res.jobid){
+              this.jobid= res.jobid
+            }
+          }
+        })
+      },
+      calc_fingerprint(){
+        let fp = this.fingerprint
+        fetch('/analysis/calcfp?fp='+fp+'&smi_col='+this.smiles_column+'&path='+this.input_file)
+        .then(res=>{
+          if(res)
+            return res.text()
+        })
+        .then(res=>{
+          this.jobid = res
+          console.log('Done! jobid is '+ this.jobid)
+          this.get_progress()
+        })
+      },
+      calc_pca(){
+        let fp = this.fingerprint
+        let url = '/analysis/pca?' + new URLSearchParams({
+          jobid: this.jobid,
+          fp: this.fingerprint
+        })
+        fetch(url).then(res=>res.text())
+        .then(res=>{
+          let data = JSON.parse(res)
+          console.log('Get Data, lenth: '+ data.length)
+          console.log(data[0])
+          this.pca_data = data
+          scatter_plot(data)
+        })
+      },
+      load_pca(){
+        let url='/analysis/pca?' + new URLSearchParams({
+          jobid: this.jobid,
+          load: true
+        })
+        fetch(url).then(res=>res.text())
+        .then(res=>{
+          let data = JSON.parse(res)
+          scatter_plot(data)
+        })
+      },
+      get_progress(){
+        let url = '/progress?jobid='+this.jobid
+        fetch(url).then(res=>res.text())
+        .then(res=>{
+          res = parseInt(res)
+          if (res > 0 && res <= 100)
+            this.progress = res
+          else
+            this.progress = 0
+          if (this.failed){
+            this.failed == false
+            return ;
+          }
+          if (this.progress != 100){
+            setTimeout(() => {
+              this.get_progress()
+            }, 500);
+          }
+        })
+      }
     }
   })
+}
+if (GLOBAL_STD){
+  app.list_dir()
+  let filepath = getUrlParam('file')
+  if(filepath){
+    app.select_file(filepath, true)
+  }
 }

@@ -1,12 +1,13 @@
 <html>
 <head>
-<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"> -->
 <link rel="stylesheet" href="{{web_prefix}}/static/css.css" />
 <script src=https://unpkg.com/jquery@3.3.1/dist/jquery.js></script>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script>
-<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+<!-- <script src="https://unpkg.com/element-ui@2.5.4/lib/index.js"></script> -->
+<!-- <script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script> -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
 <title>ChemViewer</title>
 </head>
 <body>
@@ -34,8 +35,40 @@
                 </div>
               </el-aside>
               <el-container>
-                <p>Select a file from the left</p>
-                <el-input v-model="input_file" placeholder=""></el-input>
+                <div style="width:100%; margin:10px">
+                  <p>Select a file from the left</p>
+                  <el-input v-model="input_file" placeholder=""></el-input>
+                  <el-row>
+                    <p>Read compounds from the
+                      <el-select v-model="smiles_column" placeholder="SMILES column">
+                        <el-option
+                          v-for="item in table_columns"
+                          :key="item"
+                          :label="item"
+                          :value="item">
+                        </el-option>
+                      </el-select>
+                    column. Length of the table: {{table_length}}</p>
+                  </el-row>
+                  <el-row>
+                  <p>Calculate 
+                    <el-select v-model="fingerprint" placeholder="fingerprint types">
+                      <el-option
+                        v-for="item in fingerprint_types"
+                        :key="item"
+                        :label="item"
+                        :value="item">
+                      </el-option>
+                    </el-select>
+                    fingerprints.
+                    <el-button type="primary" v-on:click="calc_fingerprint">Run</el-button>
+                    <el-button type='primary' v-on:click="calc_pca">PCA</el-button>
+                    <el-button type='default' v-on:click="load_pca">LoadPCA</el-button>
+                  </p>
+                  </el-row>
+                  <el-progress :text-inside="true" :stroke-width="26" :percentage="progress"></el-progress>
+                  <div id='scatter'></div>
+                </div>
               </el-container>
               {% endraw %}
             </el-container>
@@ -45,9 +78,7 @@
     </div>
     <script>
         GLOBAL_PAGE="analysis"
-    </script>
-    <script>
-      GLOBAL_STD=true;
+        GLOBAL_STD=true;
     </script>
     <script src="{{web_prefix}}/static/bundle.js"></script>
 </body>

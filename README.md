@@ -13,11 +13,9 @@ to browse the `table.txt`. The input file should have title line and
 there should be one column of which the title is "smi", "smiles", or
 "cannonical_smiles" (case insensitive).
 
-### How to install
+## How to install
 
-```
-pip install chemviewer
-```
+### Prerequisite
 
 If you do not have a Python environment including RDKit and Flask,
 you can download [anaconda](https://www.anaconda.com/)
@@ -31,6 +29,23 @@ Then install the dependencies:
 conda create -n chemviewer -c conda-forge rdkit
 conda activate chemviewer
 conda install flask
+```
+
+### Install by pip
+```
+pip install chemviewer
+```
+
+### Install by source
+Node.js and NPM is required to compile javascript for front-end.
+If you do not have Node.js in your computer, download [here](https://nodejs.org/)
+
+```
+git clone https://github.com/zealseeker/chemviewer.git
+cd chemviewer
+npm install
+npx webpack
+python setup.py install
 ```
 
 ## Dependency
