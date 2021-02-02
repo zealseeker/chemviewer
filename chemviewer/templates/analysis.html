@@ -67,7 +67,17 @@
                   </p>
                   </el-row>
                   <el-progress :text-inside="true" :stroke-width="26" :percentage="progress"></el-progress>
-                  <div id='scatter'></div>
+                  <el-container>
+                    <el-aside width="300px" style="padding:20px">
+                      <p>Size of Points</p>
+                      <el-slider v-model="cycle_size" :min="0.5" :max="5" :step="0.5" v-on:change="refresh_scatter"></el-slider>
+                      <el-button v-on:click="refresh_scatter">Refresh</el-button>
+                    </el-aside>
+                    <el-main>
+                      <div id='scatter'></div>
+                    </el-main>
+                  </el-container>
+                  
                 </div>
               </el-container>
               {% endraw %}

@@ -214,7 +214,12 @@ else if(GLOBAL_PAGE=='analysis'){
       progress: 1,
       jobid: '',
       failed: false,
-      pca_data: null
+      cycle_size: 3.5,
+      pca_data: [
+        {'PCA_0': 0.01, 'PCA_1':0.2}, 
+        {'PCA_0': 0.12, 'PCA_1':0.5},
+        {'PCA_0': 0.123, 'PCA_1':-0.7},
+        {'PCA_0': 1.2, 'PCA_1':-0.2}]
     },
     methods:{
       select_file(filename){
@@ -275,8 +280,14 @@ else if(GLOBAL_PAGE=='analysis'){
         fetch(url).then(res=>res.text())
         .then(res=>{
           let data = JSON.parse(res)
-          scatter_plot(data)
+          scatter_plot.run(data)
         })
+      },
+      scatter_test(){
+        scatter_plot.run(this.pca_data)
+      },
+      refresh_scatter(){
+        scatter_plot.change_size(this.cycle_size)
       },
       get_progress(){
         let url = '/progress?jobid='+this.jobid

@@ -8,7 +8,7 @@ export const filemixin = {
     methods:{
         select_dir(dir){
             if (dir == 0){
-              this.path_input = this.crtpath.replace(/\/[\u4e00-\u9fa5_a-zA-Z0-9\s\-]+$/,'')
+              this.path_input = this.crtpath.replace(/\/[\u4e00-\u9fa5_a-zA-Z0-9\s\-\.]+$/,'')
             }else{
               this.path_input = this.crtpath + '/' + dir
             }
