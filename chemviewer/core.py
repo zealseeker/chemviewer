@@ -105,6 +105,9 @@ def draw_reaction(rxn, subImgSize=(150, 150)):
     return d.GetDrawingText()
 
 def ana_table(df, col='SMILES', type=None):
+    for _col in df:
+        if df[_col].dtype == bool:
+            df[_col] = df[_col].astype(str)
     data = df.to_dict(orient='records')
     if type == 'compound':
         for item in data:

@@ -1,39 +1,39 @@
-import random
-import string
 import os
 import pandas as pd
 from flask import jsonify
 from flask import render_template
-from flask import redirect, url_for
 from flask import request
 from flask import abort
 from flask import Response
 from chemviewer.core import index
-from chemviewer.core import upload
 from chemviewer.core import app
 from chemviewer.core import ana_table
 from chemviewer.core import generate_key
 from chemviewer.analysis import Analysis
 from chemviewer.common import progress
+from chemviewer.common import logger
 from chemviewer import __version__
+
 
 @app.route('/')
 def entrence():
     return index(type='standalone')
+
 
 @app.route('/dir')
 def list_dir():
     # TODO make it safer
     path = request.args.get('path')
     filenames = os.listdir(path)
-    res = {'dir':[],'file':[]}
+    res = {'dir': [], 'file': []}
     for each in filenames:
         if os.path.isdir(os.path.join(path, each)):
             res['dir'].append(each)
         else:
-            if each.split('.')[-1] in set(['csv','xlsx','txt','xls', 'cv']):
+            if each.split('.')[-1] in set(['csv', 'xlsx', 'txt', 'xls', 'cv']):
                 res['file'].append(each)
     return jsonify(res)
+
 
 @app.route('/file')
 def select_file():
@@ -64,7 +64,7 @@ def select_file():
         else:
             smi_col = None
         return jsonify({'tableData': ana_table(df, smi_col, type),
-                        'queryNo':generate_key(),
+                        'queryNo': generate_key(),
                         'type': type})
     elif load_mode == 'pre':
         res = {
@@ -73,14 +73,18 @@ def select_file():
         }
         return jsonify(res)
 
+
 @app.route('/analysis')
 def analysis_view():
-    return render_template('analysis.html', standalone=(type=='standalone'),
+    return render_template('analysis.html', standalone=(type == 'standalone'),
                            version=__version__)
+
+
 @app.route('/analysis/calcfp')
 def calc_fp():
     path = request.args.get('path')
     fp = request.args.get('fp')
+    jobid = request.args.get('jobid')
     smi_col = request.args.get('smi_col')
     suffix = path.split('.')[-1]
     if suffix not in set(['csv', 'xlsx', 'txt', 'xls']):
@@ -90,10 +94,11 @@ def calc_fp():
               'txt': pd.read_table, 'xls': pd.read_excel}[suffix](path)
     except Exception as e:
         abort(Response('Cannot parse the file'))
-    jobid = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    logger.debug(jobid)
     analysis = Analysis(jobid, df)
     analysis.calc_fp(smi_col, fp)
-    return jobid
+    return analysis.jobid
+
 
 @app.route('/analysis/pca')
 def pca_fp():
@@ -106,6 +111,24 @@ def pca_fp():
         res = analysis.calc_pca(fp)
     return jsonify(res)
 
+
+@app.route('/analysis/draw-structure')
+def get_structure():
+    smi_col = request.args.get('smi_col')
+    jobid = request.args.get('jobid')
+    analysis = Analysis(jobid)
+    res = analysis.get_structures(smi_col)
+    return analysis.jobid
+
+
+@app.route('/analysis/fetch-structure')
+def fetch_structure():
+    jobid = request.args.get('jobid')
+    analysis = Analysis(jobid)
+    analysis.load('svg')
+    return jsonify(analysis.svgs)
+
+
 @app.route('/progress')
 def get_progress():
     jobid = request.args.get('jobid')
@@ -114,5 +137,7 @@ def get_progress():
     else:
         return '0'
 
+
 if __name__ == '__main__':
     app.run(debug=True)
+    logger.setLevel('DEBUG')

@@ -1,6 +1,6 @@
 <html>
 <head>
-<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"> -->
 <link rel="stylesheet" href="{{web_prefix}}/static/css.css" />
 <script src=https://unpkg.com/jquery@3.3.1/dist/jquery.js></script>
 <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
@@ -68,6 +68,45 @@
               <el-button :icon="inputShow?'el-icon-arrow-up':'el-icon-arrow-down'"
                 style='float: right;width:50px' type="text" @click="click_input_hide"></el-button>
             </div>
+            <div id='menubar'>
+              <el-row :gutter="10">
+                <el-col :span="2">
+                  <el-dropdown size="small" type="primary" split-button @click="show_filter_dialog"  @command="filter_command">
+                    Filter
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item command="show_filter_dialog">Set filters</el-dropdown-item>
+                      <el-dropdown-item command="clear_filter">Clear filters</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </el-col>
+                <el-col :span="8">
+                  <div>
+                    <el-select v-model="cols" style="width:100%" multiple placeholder="Properties">
+                      <el-option
+                        v-for="item in allowed_cols"
+                        :key="item"
+                        :label="item"
+                        :value="item">
+                      </el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="4" v-if="activeTag=='grid'">
+                  <div class="block" sytle="width:200px">
+                    <span class="demonstration">Size of the pictures</span>
+                    <el-slider
+                      v-on:change="change_pic_size"
+                      style="width:100%"
+                      v-model="gridsize"
+                      :min="100"
+                      :max="400"
+                      :step="50">
+                    </el-slider>
+                  </div>
+                </el-col>
+                <el-col :span="8"><div class="grid-content bg-purple"></div></el-col>
+              </el-row>
+            </div>
             <div id='spreadsheet' class='tab_content' v-loading="loading">
               <el-table
                 :data="tableData"
@@ -85,35 +124,7 @@
               </el-table>
             </div>
             <div id='grid' class='tab_content'>
-              <el-row :gutter="10">
-                <el-col :span="8">
-                  <div class="block" sytle="width:200px">
-                    <span class="demonstration">Size of the pictures</span>
-                    <el-slider
-                      v-on:change="change_pic_size"
-                      style="width:100%"
-                      v-model="gridsize"
-                      :min="100"
-                      :max="400"
-                      :step="50">
-                    </el-slider>
-                  </div>
-                </el-col>
-                <el-col :span="8">
-                  <div>
-                    <el-select v-model="cols" style="width:100%" multiple placeholder="Properties">
-                      <el-option
-                        v-for="item in allowed_cols"
-                        :key="item"
-                        :label="item"
-                        :value="item">
-                      </el-option>
-                    </el-select>
-                  </div>
-                </el-col>
-                <el-col :span="8"><div class="grid-content bg-purple"></div></el-col>
-              </el-row>
-              <div class="grid_unit" v-for="cmp in tableData" @click="openDialog(cmp)">
+              <div class="grid_unit" style="width:150px" v-for="cmp in tableData" @click="openDialog(cmp)">
                 <div class="grid_pic" style='width:150px;height:150px' v-html="cmp._svg"></div>
                 <p v-for="col in cols" class="grid-property" :title="cmp[col]">
                   {{cmp[col]}}
@@ -154,13 +165,29 @@
               <div class="block" id="pagination">
                 <el-pagination
                   @current-change="handleCurrentChange"
+                  @size-change="handleSizeChange"
                   :page-sizes="[100, 200, 300, 400]"
                   :page-size.sync="pageSize"
                   layout="sizes, prev, pager, next"
-                  :total="allData.length">
+                  :total="filter_idx.length">
                 </el-pagination>
               </div>
             </template>
+            <el-dialog
+              title="Set Filters"
+              :visible.sync="dialogFilterVisible"
+              width="30%">
+              <el-input
+                type="textarea"
+                :rows="2"
+                placeholder="SMILES=C1CCCCC1"
+                v-model="filter_text">
+              </el-input>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogFilterVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="dialog_filter_ok()">OK</el-button>
+              </span>
+            </el-dialog>
           </div>
 
         </el-container>

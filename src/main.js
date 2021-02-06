@@ -32,7 +32,11 @@ if (GLOBAL_PAGE == 'main'){
         loading: false,
         pageSize: 100,
         inputShow: true,
-        keepinput: false
+        keepinput: false,
+        filter_text: '',
+        filters: [],
+        filter_idx: [],
+        dialogFilterVisible: false
     },
     methods: {
       select_file: function(filepath, abs){
@@ -51,6 +55,8 @@ if (GLOBAL_PAGE == 'main'){
         .then(res=>{
           if(res){
             res = JSON.parse(res.replace(/\bNaN\b/g,null))
+            if(!this.keepinput)
+              this.inputShow=false
             this.loading=false
             return this.parseRes(res)
           }
@@ -111,6 +117,7 @@ if (GLOBAL_PAGE == 'main'){
         }
         this.tableData = res.tableData.slice(0,100)
         this.allData = res.tableData
+        this.filter_idx = Array.from({length: this.allData.length}, (_, d)=>d)
         if(res.tableData.length>100){
           $('#pagination').show()
         }else{
@@ -157,8 +164,8 @@ if (GLOBAL_PAGE == 'main'){
         $('.grid_pic').css('width', size+'px')
         $('.grid_pic').css('height', size+'px')
         let template = this.get_svg_template(size)
-        for (i in this.tableData){
-          item = this.tableData[i]
+        for (let i in this.tableData){
+          let item = this.tableData[i]
           if (item._svg){
             item._svg=item._svg.replace(/<svg[\s.\S]+?>/,template)
           }
@@ -183,11 +190,55 @@ if (GLOBAL_PAGE == 'main'){
         this.dialogCmp = cmp
       },
       handleCurrentChange(val) {
-        console.log(val)
-        this.tableData = this.allData.slice((val-1)*this.pageSize, val*this.pageSize)
+        let idx = this.filter_idx.slice((val-1)*this.pageSize, val*this.pageSize)
+        this.tableData = []
+        for(let i=0; i<idx.length; i++){
+          this.tableData.push(this.allData[idx[i]])
+        }
+        this.handleTagClick({name: this.activeTag})
+      },
+      handleSizeChange(val){
+        this.handleCurrentChange(1)
       },
       click_input_hide(){
         this.inputShow = !this.inputShow
+      },
+      show_filter_dialog(){
+        this.dialogFilterVisible = true
+      },
+      filter_command(command){
+        if(command == 'show_filter_dialog')
+          this.show_filter_dialog()
+        else if (command == 'clear_filter'){
+          this.filter_text = ''
+          this.run_filter(true)
+        }
+      },
+      dialog_filter_ok(){
+        this.run_filter()
+        this.dialogFilterVisible = false
+      },
+      run_filter(clear){
+        let res = this.filter_text.split('=')
+        let col, value
+        if (res.length == 2){
+          col = res[0]
+          value = res[1]
+        } else if (!clear){
+          return false;
+        }
+        this.filter_idx = []
+        for(let i=0; i<this.allData.length; i++){
+          if(clear || this.allData[i][col]==value){
+            this.filter_idx.push(i)
+          }
+        }
+        if(this.filter_idx.length>this.pageSize){
+          $('#pagination').show()
+        }else{
+          $('#pagination').hide()
+        }
+        this.handleCurrentChange(1)
       }
     }
   })
@@ -212,9 +263,10 @@ else if(GLOBAL_PAGE=='analysis'){
       fingerprint_types: ['ECFP4'],
       fingerprint: 'ECFP4',
       progress: 1,
-      jobid: '',
+      jobid: null,
       failed: false,
       cycle_size: 3.5,
+      svgs: null,
       pca_data: [
         {'PCA_0': 0.01, 'PCA_1':0.2}, 
         {'PCA_0': 0.12, 'PCA_1':0.5},
@@ -280,7 +332,7 @@ else if(GLOBAL_PAGE=='analysis'){
         fetch(url).then(res=>res.text())
         .then(res=>{
           let data = JSON.parse(res)
-          scatter_plot.run(data)
+          scatter_plot.run(data, {clicked: this.scatter_clicked})
         })
       },
       scatter_test(){
@@ -289,7 +341,7 @@ else if(GLOBAL_PAGE=='analysis'){
       refresh_scatter(){
         scatter_plot.change_size(this.cycle_size)
       },
-      get_progress(){
+      get_progress(callback){
         let url = '/progress?jobid='+this.jobid
         fetch(url).then(res=>res.text())
         .then(res=>{
@@ -304,10 +356,43 @@ else if(GLOBAL_PAGE=='analysis'){
           }
           if (this.progress != 100){
             setTimeout(() => {
-              this.get_progress()
+              this.get_progress(callback)
             }, 500);
+          } else {
+            if (callback)
+              callback()
           }
         })
+      },
+      get_structures(){
+        fetch('/analysis/draw-structure?' + new URLSearchParams({
+          smi_col: this.smiles_column,
+          jobid: this.jobid
+        }))
+        .then(res=>{
+          if(res)
+            return res.text()
+        })
+        .then(res=>{
+          this.jobid = res
+          console.log('Done! jobid is '+ this.jobid)
+          this.get_progress(this.load_structures)
+        })
+      },
+      load_structures(){
+        fetch('/analysis/fetch-structure?jobid='+this.jobid)
+        .then(res=>res.text())
+        .then(res=>{
+          this.svgs = JSON.parse(res)
+          console.log("Load SVGs, length: "+this.svgs.length)
+        })
+      },
+      scatter_clicked(d){
+        console.log(d)
+        if(this.svgs && this.svgs[d.index]){
+          console.log('Find svg')
+          $('#structure').html(this.svgs[d.index])
+        }
       }
     }
   })

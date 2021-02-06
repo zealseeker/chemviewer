@@ -3,6 +3,7 @@ from rdkit.Chem import AllChem
 from rdkit.Geometry import Point2D
 from rdkit import Chem
 from rdkit.Chem.rdChemReactions import ChemicalReaction
+from rdkit.Chem import rdDepictor
 
 svg_temp = """<?xml version='1.0' encoding='iso-8859-1'?>
 <svg version='1.1' baseProfile='full'
@@ -93,7 +94,7 @@ def draw_reaction(r: ChemicalReaction, sub_size=(150, 150)):
     height = sh
     return svg_temp.format(width, height, width, height, svg)
 
-def draw_molecule(m, highlightAtoms: list, size=(200, 200)) -> str:
+def draw_molecule(m, highlightAtoms: list = None, size=(200, 200)) -> str:
     """Draw molecule with highlight atoms
 
     Args:

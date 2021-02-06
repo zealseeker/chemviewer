@@ -64,6 +64,7 @@
                     <el-button type="primary" v-on:click="calc_fingerprint">Run</el-button>
                     <el-button type='primary' v-on:click="calc_pca">PCA</el-button>
                     <el-button type='default' v-on:click="load_pca">LoadPCA</el-button>
+                    <el-button type="default" v-on:click="get_structures">GetStructure</el-button>
                   </p>
                   </el-row>
                   <el-progress :text-inside="true" :stroke-width="26" :percentage="progress"></el-progress>
@@ -72,6 +73,7 @@
                       <p>Size of Points</p>
                       <el-slider v-model="cycle_size" :min="0.5" :max="5" :step="0.5" v-on:change="refresh_scatter"></el-slider>
                       <el-button v-on:click="refresh_scatter">Refresh</el-button>
+                      <div id='structure'></div>
                     </el-aside>
                     <el-main>
                       <div id='scatter'></div>
