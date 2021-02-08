@@ -87,17 +87,24 @@ def calc_fp():
     jobid = request.args.get('jobid')
     smi_col = request.args.get('smi_col')
     suffix = path.split('.')[-1]
-    if suffix not in set(['csv', 'xlsx', 'txt', 'xls']):
-        return abort(404)
+    if jobid:
+        analysis = Analysis(jobid)
+    elif path:
+        if suffix not in set(['csv', 'xlsx', 'txt', 'xls']):
+            return abort(404)
+        try:
+            df = {'csv': pd.read_csv, 'xlsx': pd.read_excel,
+                'txt': pd.read_table, 'xls': pd.read_excel}[suffix](path)
+        except Exception as e:
+            return jsonify({'message': 'Cannot parse the file', 'status': 500})
+        analysis = Analysis(jobid, df)
+    else:
+        abort(Response("Wrong parameters"))
     try:
-        df = {'csv': pd.read_csv, 'xlsx': pd.read_excel,
-              'txt': pd.read_table, 'xls': pd.read_excel}[suffix](path)
-    except Exception as e:
-        abort(Response('Cannot parse the file'))
-    logger.debug(jobid)
-    analysis = Analysis(jobid, df)
-    analysis.calc_fp(smi_col, fp)
-    return analysis.jobid
+        analysis.calc_fp(smi_col, fp)
+    except KeyError as e:
+        return jsonify({'message': str(e).strip("'"), 'status': 500})
+    return jsonify({'jobid': analysis.jobid, 'status': 200})
 
 
 @app.route('/analysis/pca')
@@ -117,8 +124,11 @@ def get_structure():
     smi_col = request.args.get('smi_col')
     jobid = request.args.get('jobid')
     analysis = Analysis(jobid)
-    res = analysis.get_structures(smi_col)
-    return analysis.jobid
+    try:
+        res = analysis.get_structures(smi_col)
+    except KeyError as e:
+        return jsonify({'message': str(e).strip("'"), 'status': 500})
+    return jsonify({'jobid': analysis.jobid, 'status': 200})
 
 
 @app.route('/analysis/fetch-structure')

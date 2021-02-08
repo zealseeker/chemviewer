@@ -12,8 +12,10 @@ function scatter_plot_run(data, cbs){
         .attr("transform", `translate(0,0)`)
         .call(d3.axisLeft(y))
         .call(g => g.select(".domain").remove())
-        .call(g => g.select(".tick:last-of-type text").clone()
+        .call(g => g.append("text")
             .attr("x", 4)
+            .attr("y", margin.top)
+            .attr("fill", "#000")
             .attr("text-anchor", "start")
             .attr("font-weight", "bold")
             .text('PCA_1'))
@@ -57,12 +59,13 @@ function scatter_plot_run(data, cbs){
         .extent([[0, 0], [width, height]])
         .scaleExtent([0.5, 5])
         .on('zoom', zoomed)
+        .on('end', zoomed)
     svg.append("rect")
         .attr("width", width)
+        .attr("id", "selcmp")
         .attr("height", height)
         .style("fill", "none")
         .style("pointer-events", "all")
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
         .call(zoom);
     function clicked(event, d){
         d3.selectAll('.dot').attr('stroke', null)
@@ -71,24 +74,40 @@ function scatter_plot_run(data, cbs){
             cbs.clicked(d)
         }
     }
-    function zoomed({transform}){
+    let zoom_transform = {x: 0.0, y: 0.0};
+    function zoomed({sourceEvent, transform}){
         var newX = transform.rescaleX(x);
         var newY = transform.rescaleY(y);
         // update axes with these new boundaries
         xx.call(d3.axisBottom(newX))
         yy.call(d3.axisLeft(newY))
-        scatter
-            .selectAll("circle")
-            // Too slow
-            // .attr('cx', function(d) {return newX(d.PCA_0)})
-            // .attr('cy', function(d) {return newY(d.PCA_1)});
-            .attr('transform', d => `translate(${newX(d.PCA_0)},${newY(d.PCA_1)})`)
-    }
+        if (sourceEvent.type == "mousemove"){
+            scatter.attr("transform", transform);
+            let relative = {x: transform.x - zoom_transform.x,
+                            y: transform.y - zoom_transform.y,
+                            k: 1}
+            scatter.attr('transform', `translate(${relative.x},${relative.y})`)
+        }
+        else{
+            zoom_transform = transform
+            scatter.attr('transform', null)
+                .selectAll("circle")
+                .attr('transform', d => `translate(${newX(d.PCA_0)},${newY(d.PCA_1)})`)
+        }
+     }
 }
 let scatter_plot = {
     run: scatter_plot_run,
     change_size(size){
         d3.select('div#scatter').selectAll('.dot').attr("r", size)
+    },
+    select_compounds(hide){
+        let rect = d3.select('rect#selcmp')
+        if (hide){
+            rect.style('pointer-events', 'none')
+        } else {
+            rect.style('pointer-events', 'all')
+        }
     }
 }
 export {scatter_plot}

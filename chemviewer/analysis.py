@@ -10,6 +10,7 @@ import pandas as pd
 from chemviewer.common import progress
 from chemviewer.draw import draw_molecule
 from chemviewer.common import logger
+from chemviewer.utils import NumpyEncoder
 
 
 def calc_fingerprint(obj: 'Analysis', smi_col, fp='ECFP4'):
@@ -25,6 +26,7 @@ def calc_fingerprint(obj: 'Analysis', smi_col, fp='ECFP4'):
             bit = AllChem.GetMorganFingerprintAsBitVect(
                 m, 2, nBits=2048).ToBitString()
             fp_output = list(map(int, list(bit)))
+            idx = df.index[i]
             indices.append(df.index[i])
             fps.append(fp_output)
         except:
@@ -88,8 +90,8 @@ class Analysis:
         if smi_col is None:
             smi_col = self.smi_col
             self.smi_col = smi_col
-        if smi_col is None:
-            raise ValueError('No smi_col')
+        if smi_col is None or smi_col=='null' or smi_col not in self.df:
+            raise KeyError(f'SMILES columns {smi_col} is not available')
         x = Thread(target=calc_fingerprint, args=(self, smi_col, fp))
         x.start()
         return None
@@ -113,7 +115,7 @@ class Analysis:
             self.df.to_csv(self.df_path)
         if property in ['all', 'fp']:
             with open(self.fp_path, 'w') as fp:
-                json.dump(self.fps, fp)
+                json.dump(self.fps, fp, cls=NumpyEncoder)
         if property in ['all', 'svg']:
             with open(self.svg_path, 'w') as fp:
                 json.dump(self.svgs, fp)
@@ -130,7 +132,8 @@ class Analysis:
             res = {
                 'columns': self.df.columns.to_list(),
                 'length': len(self.df),
-                'jobid': self.jobid
+                'jobid': self.jobid,
+                'smi_col': self.smi_col
             }
         return res
 
@@ -164,7 +167,7 @@ class Analysis:
         if smi_col is None:
             raise ValueError('No smi_col')
         if smi_col not in self.df:
-            raise KeyError(f'{smi_col} is not in the data')
+            raise KeyError(f'SMILES column error: {smi_col} is not in the data')
         x = Thread(target=draw_structuers, args=(self, smi_col))
         x.start()
         return None

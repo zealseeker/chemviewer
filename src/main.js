@@ -266,6 +266,7 @@ else if(GLOBAL_PAGE=='analysis'){
       jobid: null,
       failed: false,
       cycle_size: 3.5,
+      selecting_cmp: false,
       svgs: null,
       pca_data: [
         {'PCA_0': 0.01, 'PCA_1':0.2}, 
@@ -293,20 +294,28 @@ else if(GLOBAL_PAGE=='analysis'){
             if (res.jobid){
               this.jobid= res.jobid
             }
+            if (res.smi_col){
+              this.smiles_column = res.smi_col
+            }
           }
         })
       },
       calc_fingerprint(){
-        let fp = this.fingerprint
-        fetch('/analysis/calcfp?fp='+fp+'&smi_col='+this.smiles_column+'&path='+this.input_file)
-        .then(res=>{
-          if(res)
-            return res.text()
+        let url = '/analysis/calcfp?' + new URLSearchParams({
+          jobid: this.jobid,
+          smi_col: this.smiles_column,
+          path: this.input_file,
+          fp: this.fingerprint
         })
+        fetch(url)
+        .then(res=>res.json())
         .then(res=>{
-          this.jobid = res
-          console.log('Done! jobid is '+ this.jobid)
-          this.get_progress()
+          if (res.jobid){
+            this.jobid = res.jobid
+            this.get_progress()
+          } else if(res.message){
+            this.$message(res.message)
+          }
         })
       },
       calc_pca(){
@@ -318,10 +327,8 @@ else if(GLOBAL_PAGE=='analysis'){
         fetch(url).then(res=>res.text())
         .then(res=>{
           let data = JSON.parse(res)
-          console.log('Get Data, lenth: '+ data.length)
-          console.log(data[0])
           this.pca_data = data
-          scatter_plot(data)
+          scatter_plot.run(data, {clicked: this.scatter_clicked})
         })
       },
       load_pca(){
@@ -370,13 +377,15 @@ else if(GLOBAL_PAGE=='analysis'){
           jobid: this.jobid
         }))
         .then(res=>{
-          if(res)
-            return res.text()
+          return res.json()
         })
         .then(res=>{
-          this.jobid = res
-          console.log('Done! jobid is '+ this.jobid)
-          this.get_progress(this.load_structures)
+          if (res.status==200){
+            this.jobid = res.jobid
+            this.get_progress(this.load_structures)
+          } else if (res.message){
+            this.$message(res.message)
+          }
         })
       },
       load_structures(){
@@ -384,15 +393,16 @@ else if(GLOBAL_PAGE=='analysis'){
         .then(res=>res.text())
         .then(res=>{
           this.svgs = JSON.parse(res)
-          console.log("Load SVGs, length: "+this.svgs.length)
         })
       },
       scatter_clicked(d){
         console.log(d)
         if(this.svgs && this.svgs[d.index]){
-          console.log('Find svg')
           $('#structure').html(this.svgs[d.index])
         }
+      },
+      select_compound_check(val){
+        scatter_plot.select_compounds(val)
       }
     }
   })

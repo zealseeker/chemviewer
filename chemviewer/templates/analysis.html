@@ -73,6 +73,7 @@
                       <p>Size of Points</p>
                       <el-slider v-model="cycle_size" :min="0.5" :max="5" :step="0.5" v-on:change="refresh_scatter"></el-slider>
                       <el-button v-on:click="refresh_scatter">Refresh</el-button>
+                      <el-checkbox v-model="selecting_cmp" @change='select_compound_check'>Select Compounds</el-checkbox>
                       <div id='structure'></div>
                     </el-aside>
                     <el-main>
